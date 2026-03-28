@@ -9,6 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <!-- Lucide Icons -->
 <script src="https://unpkg.com/lucide@latest"></script>
+<!-- Puter.js for Grok API Integration -->
+<script src="https://js.puter.com/v2/"></script>
 
 <style>
 :root {
@@ -743,34 +745,10 @@ header {
 lucide.createIcons();
 
 /* --- DATA --- */
-const customers = [
-  {id:'pk', name:'Priya Krishnamurthy', segment:'Premium Savings', tenure:'3 yr', val:'₹4.2L CLV', score:81, tier:'high', urgency:'Urgent Action Req', 
-    emotion:['Frustrated', 'Price-sensitive'], 
-    timeline:[
-      {title:'Transaction velocity dropped 62%', desc:'Significant divergence from 12-mo average', impact:'+31% risk'},
-      {title:'3 unresolved app complaints', desc:'Helpdesk tickets open for >7 days', impact:'+22% risk'},
-      {title:'Balance decline by 40%', desc:'Funds likely transferred outward', impact:'+18% risk'}
-    ],
-    nba:{title:'Priority RM Call', conf:78, reason:'Trust score is critically low. A personalized senior RM call directly addresses the emotional dimension that automated messages cannot reach.', cost:'Medium effort', return:'High impact'}
-  },
-  {id:'ra', name:'Rahul Agarwal', segment:'Salary Account', tenure:'1.5 yr', val:'₹1.8L CLV', score:74, tier:'high', urgency:'High',
-    emotion:['Comparison-shopping'],
-    timeline:[
-      {title:'Competitor web inquiry signal', desc:'Matched external financial intent data', impact:'+28% risk'},
-      {title:'Investment activity stalled', desc:'No systemic plans renewed in 90 days', impact:'+20% risk'}
-    ],
-    nba:{title:'Send Wealth Mgmt Offer', conf:65, reason:'Competitor browsing indicates intent to invest. Immediate counter-offer required.', cost:'Low effort', return:'Med impact'}
-  },
-  {id:'ms', name:'Meena Subramaniam', segment:'NRI Savings', tenure:'6 yr', val:'₹9.5L CLV', score:58, tier:'med', urgency:'Monitor',
-    emotion:['Confused'],
-    timeline:[
-      {title:'Intl transfer dormancy', desc:'Core NRI product unused for 5 months', impact:'+24% risk'}
-    ],
-    nba:{title:'Educational Email', conf:55, reason:'Likely unaware of recent fee reductions on intl transfers.', cost:'Low effort', return:'Low impact'}
-  }
-];
+let customers = [];
+let activeCustomer = null;
+const API_BASE = 'http://localhost:8000';
 
-let activeCustomer = customers[0]; // Intelligent default
 
 /* --- MODE SWITCHING --- */
 function switchMode(modeId) {
@@ -817,28 +795,78 @@ function runCounters() {
 setTimeout(runCounters, 200);
 
 /* --- ACTION MODE LOGIC --- */
-function initActionMode() {
+async function initActionMode() {
   const listEl = document.getElementById('customer-list');
-  listEl.innerHTML = customers.map(c => `
-    <div class="customer-card ${c.id === activeCustomer.id ? 'active' : ''}" onclick="selectCustomer('${c.id}', this)">
-      <div class="cust-row">
-        <span class="cust-name">${c.name}</span>
-        <span class="badge badge-${c.tier}">${c.score}% Risk</span>
-      </div>
-      <div class="cust-meta">
-        <span>${c.segment}</span><div class="cust-val-pip"></div><span>${c.val}</span>
-      </div>
-    </div>
-  `).join('');
+  try {
+    const res = await fetch(`${API_BASE}/customers/risk`);
+    const data = await res.json();
+    
+    // Map backend data to frontend model
+    customers = data.customers.map(c => ({
+      id: c.id, name: c.name, segment: c.segment, 
+      tenure: (c.tenure_months/12).toFixed(1) + ' yr', 
+      val: '₹' + (c.clv_inr/100000).toFixed(1) + 'L CLV',
+      score: c.churn_percent || Math.round(c.churn_probability * 100), 
+      tier: c.risk_tier, 
+      urgency: 'Action Req',
+      emotion: [c.emotion_name]
+    }));
+    
+    // Set default customer
+    if (!activeCustomer && customers.length > 0) {
+      activeCustomer = customers[0];
+    }
 
-  renderActiveCustomer();
+    listEl.innerHTML = customers.map(c => `
+      <div class="customer-card ${activeCustomer && c.id === activeCustomer.id ? 'active' : ''}" onclick="selectCustomer('${c.id}', this)">
+        <div class="cust-row">
+          <span class="cust-name">${c.name}</span>
+          <span class="badge badge-${c.tier}">${c.score}% Risk</span>
+        </div>
+        <div class="cust-meta">
+          <span>${c.segment}</span><div class="cust-val-pip"></div><span>${c.val}</span>
+        </div>
+      </div>
+    `).join('');
+
+    if (activeCustomer) {
+      // Need full profile
+      selectCustomer(activeCustomer.id, null);
+    }
+  } catch (err) {
+    console.error("Failed to load customers:", err);
+    listEl.innerHTML = `<div style="padding: 20px;">Failed to load data. Ensure backend is running.</div>`;
+  }
 }
 
-function selectCustomer(id, el) {
+async function selectCustomer(id, el) {
   document.querySelectorAll('.customer-card').forEach(card => card.classList.remove('active'));
-  el.classList.add('active');
-  activeCustomer = customers.find(c => c.id === id);
-  renderActiveCustomer();
+  if (el) el.classList.add('active');
+  
+  try {
+    const res = await fetch(`${API_BASE}/customers/${id}`);
+    const cData = await res.json();
+    
+    activeCustomer = {
+      id: cData.id, name: cData.name, segment: cData.segment, 
+      tenure: (cData.tenure_months/12).toFixed(1) + ' yr', 
+      val: '₹' + (cData.clv_inr/100000).toFixed(1) + 'L CLV',
+      score: cData.churn_percent || Math.round(cData.churn_probability * 100), 
+      tier: cData.risk_tier, 
+      urgency: 'Action Req',
+      emotion: [cData.emotion_name],
+      timeline: cData.shap_reasons || [],
+      nba: {
+        title: cData.nba.title, 
+        conf: cData.nba.confidence, 
+        reason: cData.nba.reason, 
+        cost: 'Medium effort', return: 'High impact'
+      }
+    };
+    renderActiveCustomer();
+  } catch(err) {
+    console.error("Failed to fetch customer details", err);
+  }
 }
 
 function renderActiveCustomer() {
@@ -899,18 +927,31 @@ function renderActiveCustomer() {
   simulateDrafting();
 }
 
-function simulateDrafting() {
+async function simulateDrafting() {
   const msgPane = document.getElementById('outreach-msg');
   const spinner = document.getElementById('typing-indicator');
   
   msgPane.classList.add('hidden');
   spinner.classList.add('active');
 
-  setTimeout(() => {
-    spinner.classList.remove('active');
+  try {
+    const emotionContext = activeCustomer.emotion[0] || 'neutral';
+    const activeTab = document.querySelector('.tab-btn.active').innerText.toLowerCase();
+    const prompt = `Write a short, professional but empathetic ${activeTab} to a banking customer named ${activeCustomer.name.split(' ')[0]}. 
+They are in the ${activeCustomer.segment} segment and are feeling ${emotionContext}. Keep it under 3 sentences. End by asking for a 5 minute call.
+Important: Output the raw text only, no quotes or filler intro text.`;
+
+    // Connect to Grok via Puter API
+    const response = await puter.ai.chat(prompt, { model: 'grok-beta', stream: false });
+    msgPane.innerHTML = `<p>${response.replace(/\n/g, '<br>')}</p>`;
+  } catch(e) {
+    console.error("Puter API failed", e);
+    // Fallback
     msgPane.innerHTML = `<p>Hi ${activeCustomer.name.split(' ')[0]}, this is Rajesh from HD Bank. I noticed you've run into some friction with our app recently. As a valued ${activeCustomer.segment} member, I'd like to personally resolve this for you and ensure you're getting the most out of your account. Do you have 5 minutes for a quick call this week?</p>`;
-    msgPane.classList.remove('hidden');
-  }, 1200);
+  }
+
+  spinner.classList.remove('active');
+  msgPane.classList.remove('hidden');
 }
 
 function switchTab(tab, el) {
@@ -919,49 +960,56 @@ function switchTab(tab, el) {
   simulateDrafting();
 }
 
-/* --- SIMULATION MODE LOGIC --- */
-const simData = {
-  none: { score: 81, color: 'var(--risk-high)', label:'Critical Churn Risk', delta:'0 pts', rev:'₹0', rec:'Baseline (Loss imminent)' },
-  offer: { score: 72, color: 'var(--risk-med)', label:'Elevated Risk', delta:'-9 pts', rev:'₹80K', rec:'Partial impact, emotional trigger unresolved' },
-  call: { score: 56, color: 'var(--risk-med)', label:'Moderate Risk', delta:'-25 pts', rev:'₹3.2L', rec:'Highly Recommended actions' },
-  upgrade: { score: 40, color: 'var(--risk-low)', label:'Stabilized', delta:'-41 pts', rev:'₹4.2L', rec:'Highest ROI but requires approval' }
-};
-
-function runSim(scenarioId, el) {
+async function runSim(scenarioId, el) {
   if(el) {
     document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
     el.classList.add('active');
   }
 
-  const data = simData[scenarioId];
   const gaugeSvg = document.getElementById('sim-gauge-meter');
   const scoreText = document.getElementById('sim-score-text');
   const labelEl = document.getElementById('sim-score-label');
-
-  // SVG total stroke-dasharray is roughly 628 for r=100.
-  // Half circle is 314. We map score 0-100 to 314-0 offset representing progress of the half circle.
-  // We want counter-clockwise fill from bottom left (due to rotate-180), or adjust math:
-  // Offset formula for half circle: 628 (empty) to 314 (full half).
-  // Calculate percentage of 314.
-  const targetOffset = 628 - (314 * (data.score/100));
-  gaugeSvg.style.strokeDashoffset = targetOffset;
-  gaugeSvg.style.stroke = data.color;
-
-  scoreText.innerHTML = `${data.score}<span class="text-2xl">%</span>`;
-  scoreText.style.color = data.color;
-  
-  labelEl.textContent = data.label;
-  labelEl.style.color = data.color;
-
-  // Re-trigger animation on impact card
   const impactCard = document.getElementById('sim-impact-card');
-  impactCard.style.animation = 'none';
-  impactCard.offsetHeight; // trigger reflow
-  impactCard.style.animation = null;
 
-  document.getElementById('sim-delta').textContent = data.delta;
-  document.getElementById('sim-revenue').textContent = data.rev;
-  document.getElementById('sim-rec').textContent = data.rec;
+  scoreText.innerHTML = `...`;
+
+  try {
+    const res = await fetch(`${API_BASE}/simulate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer_id: activeCustomer ? activeCustomer.id : 'pk',
+        action: scenarioId
+      })
+    });
+    
+    if(!res.ok) throw new Error("Simulation request failed");
+    
+    const resultJson = await res.json();
+    const data = resultJson.simulation;
+
+    const targetOffset = 628 - (314 * (data.new_score/100));
+    gaugeSvg.style.strokeDashoffset = targetOffset;
+    gaugeSvg.style.stroke = `var(--risk-${data.color_class})`;
+
+    scoreText.innerHTML = `${Math.round(data.new_score)}<span class="text-2xl">%</span>`;
+    scoreText.style.color = `var(--risk-${data.color_class})`;
+    
+    labelEl.textContent = data.label;
+    labelEl.style.color = `var(--risk-${data.color_class})`;
+
+    // Re-trigger animation
+    impactCard.style.animation = 'none';
+    impactCard.offsetHeight; // reflow
+    impactCard.style.animation = null;
+
+    document.getElementById('sim-delta').textContent = data.delta_pts;
+    document.getElementById('sim-revenue').textContent = data.revenue_retained;
+    document.getElementById('sim-rec').textContent = data.recommendation;
+  } catch(err) {
+    console.error("Simulation error:", err);
+    scoreText.innerHTML = `Err`;
+  }
 }
 
 // init defaults

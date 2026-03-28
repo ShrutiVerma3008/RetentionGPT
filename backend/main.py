@@ -172,7 +172,7 @@ def portfolio_summary():
     }
 
 
-@app.get("/api/customers", tags=["Customers"])
+@app.get("/customers/risk", tags=["Customers"])
 def list_customers(
     risk_tier : Optional[str] = Query(None, description="Filter: high | medium | low"),
     limit     : int           = Query(50, le=500),
@@ -193,7 +193,7 @@ def list_customers(
     }
 
 
-@app.get("/api/customers/{customer_id}", tags=["Customers"])
+@app.get("/customers/{customer_id}", tags=["Customers"])
 def get_customer(customer_id: str):
     """
     Full customer profile with SHAP-driven risk explanations and NBA.
@@ -204,7 +204,7 @@ def get_customer(customer_id: str):
     return c
 
 
-@app.post("/api/simulate", tags=["Digital Twin"])
+@app.post("/simulate", tags=["Digital Twin"])
 def simulate(req: SimulateRequest):
     """
     Digital Twin counterfactual simulation.
@@ -224,7 +224,7 @@ def simulate(req: SimulateRequest):
     return {"customer_id": req.customer_id, "simulation": result}
 
 
-@app.post("/api/outreach/generate", tags=["LangChain"])
+@app.post("/generate-message", tags=["LangChain"])
 def generate_outreach(req: OutreachRequest):
     """
     LangChain 4-module pipeline: generates personalized outreach draft.
