@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: retentionai_api
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - APP_ENV=production
+      - BANK_NAME=HD Bank
+    volumes:
+      - ./data:/app/data            # persist generated datasets
+      - ./backend/models:/app/backend/models  # persist trained models
+      - ./plots:/app/plots          # persist SHAP & eval plots
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Optional: Redis for response caching (uncomment to enable)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: retentionai_redis
+  #   ports:
+  #     - "6379:6379"
+  #   restart: unless-stopped
+
+networks:
+  default:
+    name: retentionai_net

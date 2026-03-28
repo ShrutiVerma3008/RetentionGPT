@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RetentionAI — Strategic Insights</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- Lucide Icons -->
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<style>
+:root {
+  /* Premium Slate / Neutral palette */
+  --bg-app: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-hover: #f1f5f9;
+  --bg-element: #e2e8f0;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #94a3b8;
+  
+  --border-light: #e2e8f0;
+  --border-focus: #cbd5e1;
+
+  /* Fintech Accents (Stripe-ish blurple/indigo) */
+  --accent-base: #6366f1;
+  --accent-hover: #4f46e5;
+  --accent-soft: #e0e7ff;
+  --accent-glow: rgba(99, 102, 241, 0.2);
+
+  /* Semantic Risks / Outcomes */
+  --risk-high: #e11d48;
+  --risk-high-bg: #ffe4e6;
+  --risk-med: #d97706;
+  --risk-med-bg: #fef3c7;
+  --risk-low: #10b981;
+  --risk-low-bg: #d1fae5;
+  
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+  --shadow-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --trans-fast: 0.15s ease;
+  --trans-med: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --trans-slow: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* App-like feel */
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- TYPOGRAPHY --- */
+h1, h2, h3, h4 { font-weight: 600; letter-spacing: -0.02em; }
+.mono { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; }
+.text-xs { font-size: 0.75rem; }
+.text-sm { font-size: 0.875rem; }
+.text-base { font-size: 1rem; }
+.text-lg { font-size: 1.125rem; }
+.text-xl { font-size: 1.25rem; }
+.text-2xl { font-size: 1.5rem; }
+
+.text-muted { color: var(--text-secondary); }
+.font-medium { font-weight: 500; }
+.uppercase-tracking { text-transform: uppercase; letter-spacing: 0.05em; font-size: 0.7rem; font-weight: 600; color: var(--text-tertiary); }
+
+/* --- HEADER --- */
+header {
+  height: 64px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  z-index: 10;
+  flex-shrink: 0;
+}
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.logo-icon {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--accent-base), #818cf8);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 12px var(--accent-glow);
+}
+
+/* Mode Switcher */
+.mode-switcher {
+  display: flex;
+  background: var(--bg-app);
+  border-radius: var(--radius-lg);
+  padding: 4px;
+  gap: 4px;
+  border: 1px solid var(--border-light);
+}
+.mode-btn {
+  border: none;
+  background: transparent;
+  padding: 6px 16px;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--trans-med);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mode-btn:hover { color: var(--text-primary); }
+.mode-btn.active {
+  background: var(--bg-card);
+  color: var(--accent-base);
+  box-shadow: var(--shadow-sm);
+}
+.header-actions { display: flex; align-items: center; gap: 16px; }
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg-element); display: flex; align-items: center; justify-content: center;
+  font-weight: 600; border: 2px solid white; box-shadow: var(--shadow-sm);
+}
+
+/* --- MAIN LAYOUT --- */
+.main-container {
+  flex: 1;
+  display: flex;
+  height: calc(100vh - 64px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Views Container - absolute positioning for crossfade */
+.view-layer {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  transform: translateY(10px);
+  overflow-y: auto;
+  padding: 32px;
+}
+.view-layer.active {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* --- OVERVIEW MODE --- */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.kpi-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  transition: all var(--trans-med);
+  position: relative;
+  overflow: hidden;
+}
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-focus);
+}
+.kpi-card::before { /* Subtle top gradient line */
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent-base), transparent);
+  opacity: 0; transition: opacity var(--trans-med);
+}
+.kpi-card:hover::before { opacity: 1; }
+.kpi-label { margin-bottom: 12px; }
+.kpi-val { font-size: 2.5rem; font-weight: 600; color: var(--text-primary); letter-spacing: -0.03em; line-height: 1; margin-bottom: 8px; }
+.kpi-delta { display: flex; align-items: center; gap: 6px; font-size: 0.875rem; font-weight: 500; }
+.delta-up { color: var(--risk-high); }
+.delta-up-good { color: var(--risk-low); }
+.delta-down { color: var(--risk-low); }
+.kpi-icon { position: absolute; top: 24px; right: 24px; color: var(--border-light); opacity: 0.5; }
+
+/* Portfolio Risk Heatmap */
+.portfolio-section {
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+}
+.risk-meters-container { display: flex; gap: 24px; margin-top: 24px; }
+.risk-meter { flex: 1; background: var(--bg-app); border-radius: var(--radius-md); padding: 20px; text-align: center; }
+.meter-ring { margin: 0 auto 16px; width: 120px; height: 120px; position: relative; }
+/* Using conic-gradient for ring via inline CSS below */
+.meter-ring-inner { position: absolute; inset: 10px; background: var(--bg-app); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+.meter-val { font-size: 1.5rem; font-weight: 600; }
+
+/* --- ACTION MODE (Asymmetrical split) --- */
+.action-layout {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 32px;
+  height: 100%;
+}
+.customer-list-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  height: calc(100vh - 128px); /* Account for padding */
+  overflow-y: auto;
+  padding-right: 8px;
+}
+.customer-list-pane::-webkit-scrollbar { width: 4px; }
+.customer-list-pane::-webkit-scrollbar-thumb { background: var(--border-focus); border-radius: 4px; }
+
+.customer-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  cursor: pointer;
+  transition: all var(--trans-fast);
+  position: relative;
+  overflow: hidden;
+}
+.customer-card:hover {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-md);
+}
+.customer-card.active {
+  border-color: var(--accent-base);
+  box-shadow: 0 0 0 1px var(--accent-base), var(--shadow-md);
+  background: var(--accent-soft);
+}
+.customer-card.active::after { /* Active indicator pip */
+  content: ''; position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent-base);
+}
+.cust-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.cust-name { font-weight: 600; color: var(--text-primary); font-size: 0.95rem; }
+.badge { padding: 4px 8px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+.badge-high { background: var(--risk-high-bg); color: var(--risk-high); }
+.badge-med { background: var(--risk-med-bg); color: var(--risk-med); }
+.badge-low { background: var(--risk-low-bg); color: var(--risk-low); }
+.cust-meta { font-size: 0.8rem; color: var(--text-secondary); display: flex; gap: 8px; align-items: center; }
+.cust-val-pip { width: 4px; height: 4px; background: var(--border-focus); border-radius: 50%; }
+
+/* Action Detail Pane */
+.action-detail-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  height: calc(100vh - 128px);
+  overflow-y: auto;
+  padding-bottom: 40px;
+}
+.action-detail-pane::-webkit-scrollbar { display: none; }
+
+/* Focus Notification */
+.focus-alert {
+  background: linear-gradient(to right, #1e293b, #0f172a);
+  color: white;
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-md);
+  animation: slideInDown 0.5s var(--trans-slow);
+}
+@keyframes slideInDown { from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:translateY(0);} }
+
+/* Customer Hero Card */
+.hero-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+.hero-avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--risk-high-bg); color: var(--risk-high);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; font-weight: 600; flex-shrink: 0;
+}
+.hero-info { flex: 1; }
+.hero-name { font-size: 1.5rem; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 12px; }
+.tags-row { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.emotion-tag {
+  background: var(--bg-app); border: 1px solid var(--border-light);
+  padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 500;
+  display: flex; align-items: center; gap: 6px;
+  transition: all var(--trans-fast);
+}
+.emotion-tag:hover { border-color: var(--border-focus); background: var(--bg-card); }
+
+/* Grid for Timeline and NBA */
+.insight-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+/* Timeline / Why at Risk */
+.timeline-card {
+  background: var(--bg-card); border-radius: var(--radius-xl); padding: 24px;
+  border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);
+}
+.timeline {
+  display: flex; flex-direction: column; gap: 16px; position: relative;
+  padding-left: 20px; margin-top: 16px;
+}
+.timeline::before {
+  content: ''; position: absolute; left: 6px; top: 6px; bottom: 6px;
+  width: 2px; background: var(--border-light); border-radius: 2px;
+}
+.tl-item { position: relative; animation: fadeInRight 0.5s var(--trans-slow) backwards; }
+.tl-item:nth-child(1) { animation-delay: 0.1s; }
+.tl-item:nth-child(2) { animation-delay: 0.2s; }
+.tl-item:nth-child(3) { animation-delay: 0.3s; }
+@keyframes fadeInRight { from{opacity:0; transform:translateX(-15px);} to{opacity:1; transform:translateX(0);} }
+.tl-dot {
+  position: absolute; left: -20px; top: 4px; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--bg-card); border: 2px solid var(--accent-base);
+  box-shadow: 0 0 0 4px var(--bg-card);
+}
+.tl-content { background: var(--bg-app); padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-light); }
+.tl-title { font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; }
+.tl-desc { font-size: 0.8rem; color: var(--text-secondary); }
+.tl-impact { margin-top: 8px; font-size: 0.75rem; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; background: white; padding: 2px 8px; border-radius: 4px; border: 1px solid var(--border-light); }
+
+/* Next Best Action Card */
+.nba-card {
+  background: linear-gradient(145deg, #1e1b4b, #312e81);
+  color: white;
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  box-shadow: 0 12px 24px rgba(49, 46, 129, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+.nba-card::before { /* Subtle background glow */
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.4) 0%, transparent 60%);
+  pointer-events: none; opacity: 0.5;
+}
+.nba-header { display: flex; justify-content: space-between; align-items: flex-start; position: relative; z-index: 1; }
+.nba-title-group { display: flex; gap: 12px; align-items: center; }
+.nba-icon-wrap { background: rgba(255,255,255,0.1); padding: 10px; border-radius: var(--radius-md); backdrop-filter: blur(4px); }
+.conf-badge { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+.nba-body { margin-top: 20px; position: relative; z-index: 1; }
+.nba-reason { font-size: 0.9rem; line-height: 1.6; color: #e2e8f0; margin-bottom: 20px; }
+.nba-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+.nba-stat { background: rgba(0,0,0,0.2); padding: 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.05); }
+.nba-stat-label { font-size: 0.7rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; margin-bottom: 4px; }
+.nba-stat-val { font-size: 1.1rem; font-weight: 600; color: white; display: flex; align-items: center; gap: 6px; }
+.btn-primary { 
+  background: white; color: #312e81; border: none; padding: 12px 24px; border-radius: var(--radius-sm);
+  font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: all var(--trans-fast);
+  width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px;
+}
+.btn-primary:hover { background: #f8fafc; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.btn-primary:active { transform: translateY(0) scale(0.98); }
+
+/* Outreach Preview Panel */
+.outreach-card {
+  background: var(--bg-card); border-radius: var(--radius-xl); padding: 24px;
+  border: 1px solid var(--border-light); box-shadow: var(--shadow-sm);
+}
+.tab-list { display: flex; gap: 8px; border-bottom: 1px solid var(--border-light); padding-bottom: 12px; margin-bottom: 20px; }
+.tab-btn { background: none; border: none; font-size: 0.875rem; font-weight: 500; color: var(--text-secondary); cursor: pointer; padding: 6px 12px; border-radius: var(--radius-sm); transition: var(--trans-fast); }
+.tab-btn:hover { background: var(--bg-app); }
+.tab-btn.active { background: var(--accent-soft); color: var(--accent-hover); }
+
+.message-box { background: var(--bg-app); border: 1px solid var(--border-light); border-radius: var(--radius-md); padding: 20px; font-size: 0.9rem; line-height: 1.6; position: relative; min-height: 120px; }
+/* Simulated typing skeleton */
+.typing-indicator { display: none; align-items: center; gap: 4px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+.typing-indicator.active { display: flex; }
+.dot { width: 6px; height: 6px; background: var(--accent-base); border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
+.dot:nth-child(1) { animation-delay: -0.32s; }
+.dot:nth-child(2) { animation-delay: -0.16s; }
+@keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+.msg-content { opacity: 1; transition: opacity 0.3s; }
+.msg-content.hidden { opacity: 0; pointer-events: none; }
+
+
+/* --- SIMULATION MODE (Digital Twin) --- */
+.sim-layout { display: flex; flex-direction: column; gap: 32px; height: 100%; align-items: center; justify-content: center; }
+.sim-header { text-align: center; max-width: 600px; }
+
+.sim-stage {
+  display: flex;
+  gap: 48px;
+  background: var(--bg-card);
+  padding: 48px;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-light);
+  width: 100%;
+  max-width: 1000px;
+  align-items: center;
+}
+
+/* Scenarios List */
+.scenario-list { display: flex; flex-direction: column; gap: 16px; flex: 1; }
+.scenario-btn {
+  background: var(--bg-app); border: 1px solid var(--border-light); padding: 16px 20px;
+  border-radius: var(--radius-md); text-align: left; cursor: pointer; transition: all var(--trans-fast);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.scenario-btn:hover { border-color: var(--border-focus); transform: translateX(4px); }
+.scenario-btn.active { background: white; border-color: var(--accent-base); box-shadow: 0 0 0 1px var(--accent-base), var(--shadow-md); }
+.scenario-btn.active .scenario-title { color: var(--accent-base); }
+.scenario-title { font-weight: 600; font-size: 1rem; color: var(--text-primary); margin-bottom: 4px; transition: color var(--trans-fast); }
+.scenario-desc { font-size: 0.8rem; color: var(--text-secondary); }
+.scenario-arrow { color: var(--text-tertiary); opacity: 0; transition: opacity var(--trans-fast); }
+.scenario-btn.active .scenario-arrow { opacity: 1; color: var(--accent-base); }
+
+/* Gauge area */
+.gauge-area { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+.sim-gauge-wrap { position: relative; width: 240px; height: 120px; overflow: hidden; margin-bottom: 32px; }
+/* SVN Semi-circle Gauge */
+.sim-gauge-svg { width: 100%; height: 200%; position: absolute; top: 0; left: 0; transform: rotate(-180deg); }
+.gauge-bg { fill: none; stroke: var(--bg-element); stroke-width: 12; stroke-linecap: round; }
+.gauge-fill { fill: none; stroke: var(--risk-high); stroke-width: 12; stroke-linecap: round; stroke-dasharray: 628; stroke-dashoffset: 628; transition: stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1), stroke 1s; }
+
+.gauge-content { position: absolute; bottom: 0; left: 0; right: 0; text-align: center; }
+.gauge-score { font-size: 4rem; font-weight: 700; line-height: 1; color: var(--text-primary); letter-spacing: -0.04em; transition: color 1s; }
+.gauge-label { font-size: 0.8rem; font-weight: 600; text-transform: uppercase; color: var(--text-tertiary); letter-spacing: 0.05em; margin-top: 8px; }
+
+.sim-impact-card {
+  background: var(--bg-app);
+  border: 1px dashed var(--border-focus);
+  padding: 20px;
+  border-radius: var(--radius-md);
+  width: 100%;
+  animation: fadeIn 0.5s ease backwards;
+}
+@keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
+.impact-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.9rem; }
+.impact-val { font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="header-logo">
+    <div class="logo-icon"><i data-lucide="zap"></i></div>
+    <span>RetentionAI</span>
+    <span class="text-muted font-medium text-sm" style="margin-left: 8px; border-left: 1px solid var(--border-light); padding-left: 12px;">Relationship Intelligence</span>
+  </div>
+
+  <div class="mode-switcher">
+    <button class="mode-btn active" onclick="switchMode('overview')"><i data-lucide="layout-dashboard" size="16"></i> Overview</button>
+    <button class="mode-btn" onclick="switchMode('action')"><i data-lucide="crosshair" size="16"></i> Action Mode</button>
+    <button class="mode-btn" onclick="switchMode('simulation')"><i data-lucide="flask-conical" size="16"></i> Simulation</button>
+  </div>
+
+  <div class="header-actions">
+    <button class="mode-btn" style="padding: 8px;"><i data-lucide="bell" size="18"></i></button>
+    <div class="avatar">RA</div>
+  </div>
+</header>
+
+<main class="main-container">
+
+  <!-- OVERVIEW VIEW -->
+  <div id="view-overview" class="view-layer active">
+    <div>
+      <h2 class="text-xl" style="margin-bottom: 24px;">Portfolio Overview</h2>
+      
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <i data-lucide="users" class="kpi-icon" size="24"></i>
+          <div class="uppercase-tracking kpi-label">Customers at Risk</div>
+          <div class="kpi-val counter" data-target="347">0</div>
+          <div class="kpi-delta delta-up"><i data-lucide="trending-up" size="14"></i> 23 since yesterday</div>
+        </div>
+        <div class="kpi-card">
+          <i data-lucide="activity" class="kpi-icon" size="24"></i>
+          <div class="uppercase-tracking kpi-label">Avg Churn Probability</div>
+          <div class="kpi-val"><span class="counter" data-target="61">0</span>%</div>
+          <div class="kpi-delta delta-down"><i data-lucide="trending-down" size="14"></i> 3pts this week</div>
+        </div>
+        <div class="kpi-card">
+          <i data-lucide="indian-rupee" class="kpi-icon" size="24"></i>
+          <div class="uppercase-tracking kpi-label">Revenue at Risk</div>
+          <div class="kpi-val">2.4<span class="text-lg text-muted">Cr</span></div>
+          <div class="kpi-delta delta-up"><i data-lucide="trending-up" size="14"></i> ₹18L from last week</div>
+        </div>
+        <div class="kpi-card">
+          <i data-lucide="target" class="kpi-icon" size="24"></i>
+          <div class="uppercase-tracking kpi-label">Intervention Success</div>
+          <div class="kpi-val"><span class="counter" data-target="38">0</span>%</div>
+          <div class="kpi-delta delta-up-good"><i data-lucide="trending-up" size="14"></i> 6pts MoM</div>
+        </div>
+      </div>
+
+      <div class="portfolio-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); padding-bottom: 16px;">
+          <div>
+            <h3 class="text-lg">Risk Distribution Heatmap</h3>
+            <p class="text-sm text-muted">Breakdown of active customer base by model prediction tier</p>
+          </div>
+          <button class="mode-btn" onclick="switchMode('action')" style="background: var(--bg-app); border: 1px solid var(--border-focus);"><i data-lucide="arrow-right" size="16"></i> Go to Action Mode</button>
+        </div>
+
+        <div class="risk-meters-container">
+          <div class="risk-meter">
+            <div class="meter-ring" style="background: conic-gradient(var(--risk-high) 28%, var(--border-light) 0); border-radius: 50%;">
+              <div class="meter-ring-inner">
+                <div class="meter-val text-primary counter" data-target="28">0</div><span class="text-xs text-muted">%</span>
+              </div>
+            </div>
+            <div class="font-medium text-sm">High Risk</div>
+            <div class="text-xs text-muted" style="margin-top:4px;">Probability > 70%</div>
+          </div>
+          <div class="risk-meter">
+            <div class="meter-ring" style="background: conic-gradient(var(--risk-med) 45%, var(--border-light) 0); border-radius: 50%;">
+              <div class="meter-ring-inner">
+                <div class="meter-val text-primary counter" data-target="45">0</div><span class="text-xs text-muted">%</span>
+              </div>
+            </div>
+            <div class="font-medium text-sm">Medium Risk</div>
+            <div class="text-xs text-muted" style="margin-top:4px;">Probability 30-70%</div>
+          </div>
+          <div class="risk-meter">
+            <div class="meter-ring" style="background: conic-gradient(var(--risk-low) 27%, var(--border-light) 0); border-radius: 50%;">
+              <div class="meter-ring-inner">
+                <div class="meter-val text-primary counter" data-target="27">0</div><span class="text-xs text-muted">%</span>
+              </div>
+            </div>
+            <div class="font-medium text-sm">Low Risk</div>
+            <div class="text-xs text-muted" style="margin-top:4px;">Probability < 30%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTION VIEW -->
+  <div id="view-action" class="view-layer">
+    <div class="action-layout">
+      <!-- Left Sidebar: Customer List -->
+      <div class="customer-list-pane" id="customer-list">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Right Detail Pane -->
+      <div class="action-detail-pane">
+        
+        <div class="focus-alert">
+          <div style="display:flex; gap:12px; align-items:center;">
+            <i data-lucide="sparkles" size="20" style="color:#fcd34d;"></i>
+            <div>
+              <div class="font-medium">Intelligent Default Selection</div>
+              <div class="text-sm" style="color:#94a3b8; margin-top:2px;">Showing highest risk + highest CLV customer requiring immediate attention.</div>
+            </div>
+          </div>
+          <button class="mode-btn" style="color:white; border-color:rgba(255,255,255,0.2);">Override</button>
+        </div>
+
+        <div class="hero-card" id="action-hero">
+          <!-- Hero info injected here -->
+        </div>
+
+        <div class="insight-grid">
+          <!-- Why at Risk Timeline -->
+          <div class="timeline-card">
+            <h3 class="text-base" style="margin-bottom: 4px;">Why they are at risk</h3>
+            <p class="text-sm text-muted">Key negative factors identified by the model</p>
+            
+            <div class="timeline" id="action-timeline">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <!-- Recommendations Stack -->
+          <div style="display: flex; flex-direction: column; gap: 24px;">
+            
+            <div class="nba-card" id="action-nba">
+              <!-- Rendered by JS -->
+            </div>
+
+            <!-- Outreach Preview -->
+            <div class="outreach-card">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <h3 class="text-base"><i data-lucide="bot" size="16" style="vertical-align:-2px; margin-right:6px; color:var(--accent-base);"></i> AI Outreach Draft</h3>
+              </div>
+              
+              <div class="tab-list">
+                <button class="tab-btn active" onclick="switchTab('email', this)">Email</button>
+                <button class="tab-btn" onclick="switchTab('whatsapp', this)">WhatsApp</button>
+              </div>
+
+              <div class="message-box">
+                <div class="typing-indicator" id="typing-indicator">
+                  <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
+                <div class="msg-content hidden" id="outreach-msg">
+                  <!-- Draft injetced here -->
+                </div>
+              </div>
+
+              <div style="display:flex; gap:12px; margin-top:20px;">
+                <button class="mode-btn" style="flex:1; background:var(--bg-app); border-color:var(--border-focus);"><i data-lucide="edit-2" size="14"></i> Edit Draft</button>
+                <button class="mode-btn" style="flex:1; background:var(--accent-base); color:white; border-color:var(--accent-base);"><i data-lucide="send" size="14"></i> Send Now</button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIMULATION VIEW -->
+  <div id="view-simulation" class="view-layer">
+    <div class="sim-layout">
+      
+      <div class="sim-header">
+        <h2 class="text-2xl" style="margin-bottom:8px;">Digital Twin Interactive Simulation</h2>
+        <p class="text-muted">Test intervention scenarios to forecast impact on churn probability and customer lifetime value before executing actions.</p>
+      </div>
+
+      <div class="sim-stage">
+        
+        <!-- Scenarios Left -->
+        <div class="scenario-list">
+          <div class="uppercase-tracking" style="margin-bottom: 8px;">Available Interventions</div>
+          
+          <button class="scenario-btn active" onclick="runSim('none', this)">
+            <div>
+              <div class="scenario-title">Baseline Action (None)</div>
+              <div class="scenario-desc">Do not intervene.</div>
+            </div>
+            <i data-lucide="chevron-right" class="scenario-arrow" size="20"></i>
+          </button>
+          
+          <button class="scenario-btn" onclick="runSim('offer', this)">
+            <div>
+              <div class="scenario-title">Send Automated Offer</div>
+              <div class="scenario-desc">Email 50% fee waiver coupon.</div>
+            </div>
+            <i data-lucide="chevron-right" class="scenario-arrow" size="20"></i>
+          </button>
+
+          <button class="scenario-btn" onclick="runSim('call', this)">
+            <div>
+              <div class="scenario-title">Priority RM Call</div>
+              <div class="scenario-desc">Personalized check-in to address frustration.</div>
+            </div>
+            <i data-lucide="chevron-right" class="scenario-arrow" size="20"></i>
+          </button>
+
+          <button class="scenario-btn" onclick="runSim('upgrade', this)">
+            <div>
+              <div class="scenario-title">Premier Upgrade</div>
+              <div class="scenario-desc">Waive requirements for premium tier.</div>
+            </div>
+            <i data-lucide="chevron-right" class="scenario-arrow" size="20"></i>
+          </button>
+        </div>
+
+        <!-- Gauge Right -->
+        <div class="gauge-area">
+          <div class="sim-gauge-wrap">
+            <!-- viewBox creates a half circle view -->
+            <svg class="sim-gauge-svg" viewBox="0 0 240 240">
+              <circle cx="120" cy="120" r="100" class="gauge-bg"></circle>
+              <circle cx="120" cy="120" r="100" class="gauge-fill" id="sim-gauge-meter"></circle>
+            </svg>
+            <div class="gauge-content">
+              <div class="gauge-score" id="sim-score-text">81<span class="text-2xl">%</span></div>
+            </div>
+          </div>
+          <div class="gauge-label" id="sim-score-label" style="color:var(--risk-high)">Critical Churn Risk</div>
+
+          <div style="width: 100%; margin-top: 40px;">
+            <div class="uppercase-tracking" style="margin-bottom: 12px;">Forecasted Impact</div>
+            <div class="sim-impact-card" id="sim-impact-card">
+              <div class="impact-row">
+                <span class="text-muted">Delta in Probability</span>
+                <span class="impact-val" id="sim-delta">-</span>
+              </div>
+              <div class="impact-row">
+                <span class="text-muted">Estimated Revenue Retained</span>
+                <span class="impact-val" style="color:var(--risk-low)" id="sim-revenue">-</span>
+              </div>
+              <div class="impact-row" style="margin-bottom:0; padding-top:12px; border-top:1px solid var(--border-light)">
+                <span class="text-muted">Recommendation</span>
+                <span class="impact-val text-sm font-medium" id="sim-rec" style="color:var(--text-primary)">Not recommended</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// Initialize Lucide icons
+lucide.createIcons();
+
+/* --- DATA --- */
+const customers = [
+  {id:'pk', name:'Priya Krishnamurthy', segment:'Premium Savings', tenure:'3 yr', val:'₹4.2L CLV', score:81, tier:'high', urgency:'Urgent Action Req', 
+    emotion:['Frustrated', 'Price-sensitive'], 
+    timeline:[
+      {title:'Transaction velocity dropped 62%', desc:'Significant divergence from 12-mo average', impact:'+31% risk'},
+      {title:'3 unresolved app complaints', desc:'Helpdesk tickets open for >7 days', impact:'+22% risk'},
+      {title:'Balance decline by 40%', desc:'Funds likely transferred outward', impact:'+18% risk'}
+    ],
+    nba:{title:'Priority RM Call', conf:78, reason:'Trust score is critically low. A personalized senior RM call directly addresses the emotional dimension that automated messages cannot reach.', cost:'Medium effort', return:'High impact'}
+  },
+  {id:'ra', name:'Rahul Agarwal', segment:'Salary Account', tenure:'1.5 yr', val:'₹1.8L CLV', score:74, tier:'high', urgency:'High',
+    emotion:['Comparison-shopping'],
+    timeline:[
+      {title:'Competitor web inquiry signal', desc:'Matched external financial intent data', impact:'+28% risk'},
+      {title:'Investment activity stalled', desc:'No systemic plans renewed in 90 days', impact:'+20% risk'}
+    ],
+    nba:{title:'Send Wealth Mgmt Offer', conf:65, reason:'Competitor browsing indicates intent to invest. Immediate counter-offer required.', cost:'Low effort', return:'Med impact'}
+  },
+  {id:'ms', name:'Meena Subramaniam', segment:'NRI Savings', tenure:'6 yr', val:'₹9.5L CLV', score:58, tier:'med', urgency:'Monitor',
+    emotion:['Confused'],
+    timeline:[
+      {title:'Intl transfer dormancy', desc:'Core NRI product unused for 5 months', impact:'+24% risk'}
+    ],
+    nba:{title:'Educational Email', conf:55, reason:'Likely unaware of recent fee reductions on intl transfers.', cost:'Low effort', return:'Low impact'}
+  }
+];
+
+let activeCustomer = customers[0]; // Intelligent default
+
+/* --- MODE SWITCHING --- */
+function switchMode(modeId) {
+  // Update buttons
+  document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+
+  // Update Views
+  document.querySelectorAll('.view-layer').forEach(view => view.classList.remove('active'));
+  document.getElementById(`view-${modeId}`).classList.add('active');
+
+  // Specific triggers
+  if(modeId === 'overview') runCounters();
+  if(modeId === 'action') initActionMode();
+  if(modeId === 'simulation') {
+    // reset sim to none
+    document.querySelector('.scenario-btn').click();
+  }
+}
+
+/* --- ANIMATIONS --- */
+function animateValue(obj, start, end, duration) {
+  let startTimestamp = null;
+  const step = (timestamp) => {
+    if (!startTimestamp) startTimestamp = timestamp;
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+    // easing out outExpo
+    const easeOutStr = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+    obj.innerHTML = Math.floor(easeOutStr * (end - start) + start);
+    if (progress < 1) {
+      window.requestAnimationFrame(step);
+    }
+  };
+  window.requestAnimationFrame(step);
+}
+
+function runCounters() {
+  document.querySelectorAll('.counter').forEach(el => {
+    const target = parseInt(el.getAttribute('data-target'));
+    animateValue(el, 0, target, 1500);
+  });
+}
+// Run once on load
+setTimeout(runCounters, 200);
+
+/* --- ACTION MODE LOGIC --- */
+function initActionMode() {
+  const listEl = document.getElementById('customer-list');
+  listEl.innerHTML = customers.map(c => `
+    <div class="customer-card ${c.id === activeCustomer.id ? 'active' : ''}" onclick="selectCustomer('${c.id}', this)">
+      <div class="cust-row">
+        <span class="cust-name">${c.name}</span>
+        <span class="badge badge-${c.tier}">${c.score}% Risk</span>
+      </div>
+      <div class="cust-meta">
+        <span>${c.segment}</span><div class="cust-val-pip"></div><span>${c.val}</span>
+      </div>
+    </div>
+  `).join('');
+
+  renderActiveCustomer();
+}
+
+function selectCustomer(id, el) {
+  document.querySelectorAll('.customer-card').forEach(card => card.classList.remove('active'));
+  el.classList.add('active');
+  activeCustomer = customers.find(c => c.id === id);
+  renderActiveCustomer();
+}
+
+function renderActiveCustomer() {
+  const c = activeCustomer;
+  
+  // Hero
+  const initials = c.name.split(' ').map(n=>n[0]).join('');
+  const emotionTags = c.emotion.map(e => `<span class="emotion-tag"><i data-lucide="tag" size="12"></i> ${e}</span>`).join('');
+  
+  document.getElementById('action-hero').innerHTML = `
+    <div class="hero-avatar" style="background:var(--risk-${c.tier}-bg); color:var(--risk-${c.tier})">${initials}</div>
+    <div class="hero-info">
+      <div class="hero-name">${c.name} <span class="badge badge-${c.tier}" style="font-size:0.7rem;">${c.urgency}</span></div>
+      <div class="text-sm text-muted">${c.segment} • ${c.tenure} • ${c.val}</div>
+      <div class="tags-row">${emotionTags}</div>
+    </div>
+  `;
+
+  // Timeline (re-trigger animation by re-inserting HTML)
+  const timelineHTML = c.timeline.map(tl => `
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-content">
+        <div class="tl-title">${tl.title}</div>
+        <div class="tl-desc">${tl.desc}</div>
+        <div class="tl-impact"><i data-lucide="trending-up" size="12" style="color:var(--risk-high)"></i> ${tl.impact}</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('action-timeline').innerHTML = ''; // clear
+  setTimeout(() => { document.getElementById('action-timeline').innerHTML = timelineHTML; lucide.createIcons(); }, 10);
+
+  // NBA
+  document.getElementById('action-nba').innerHTML = `
+    <div class="nba-header">
+      <div class="nba-title-group">
+        <div class="nba-icon-wrap"><i data-lucide="phone-call" size="24" color="white"></i></div>
+        <div>
+          <div class="uppercase-tracking" style="color:#a5b4fc; margin-bottom:2px;">Next Best Action</div>
+          <h3 class="text-lg">${c.nba.title}</h3>
+        </div>
+      </div>
+      <span class="conf-badge">${c.nba.conf}% Confident</span>
+    </div>
+    <div class="nba-body">
+      <p class="nba-reason">${c.nba.reason}</p>
+      <div class="nba-stats-grid">
+        <div class="nba-stat"><div class="nba-stat-label">Effort</div><div class="nba-stat-val"><i data-lucide="clock" size="14"></i> ${c.nba.cost}</div></div>
+        <div class="nba-stat"><div class="nba-stat-label">Projected Return</div><div class="nba-stat-val"><i data-lucide="bar-chart-2" size="14"></i> ${c.nba.return}</div></div>
+      </div>
+      <button class="btn-primary" onclick="alert('Action dispatched to CRM.')"><i data-lucide="check-circle" size="16"></i> Dispatch Action</button>
+    </div>
+  `;
+  
+  lucide.createIcons();
+
+  // Simulate typing for outreach wrapper
+  simulateDrafting();
+}
+
+function simulateDrafting() {
+  const msgPane = document.getElementById('outreach-msg');
+  const spinner = document.getElementById('typing-indicator');
+  
+  msgPane.classList.add('hidden');
+  spinner.classList.add('active');
+
+  setTimeout(() => {
+    spinner.classList.remove('active');
+    msgPane.innerHTML = `<p>Hi ${activeCustomer.name.split(' ')[0]}, this is Rajesh from HD Bank. I noticed you've run into some friction with our app recently. As a valued ${activeCustomer.segment} member, I'd like to personally resolve this for you and ensure you're getting the most out of your account. Do you have 5 minutes for a quick call this week?</p>`;
+    msgPane.classList.remove('hidden');
+  }, 1200);
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  el.classList.add('active');
+  simulateDrafting();
+}
+
+/* --- SIMULATION MODE LOGIC --- */
+const simData = {
+  none: { score: 81, color: 'var(--risk-high)', label:'Critical Churn Risk', delta:'0 pts', rev:'₹0', rec:'Baseline (Loss imminent)' },
+  offer: { score: 72, color: 'var(--risk-med)', label:'Elevated Risk', delta:'-9 pts', rev:'₹80K', rec:'Partial impact, emotional trigger unresolved' },
+  call: { score: 56, color: 'var(--risk-med)', label:'Moderate Risk', delta:'-25 pts', rev:'₹3.2L', rec:'Highly Recommended actions' },
+  upgrade: { score: 40, color: 'var(--risk-low)', label:'Stabilized', delta:'-41 pts', rev:'₹4.2L', rec:'Highest ROI but requires approval' }
+};
+
+function runSim(scenarioId, el) {
+  if(el) {
+    document.querySelectorAll('.scenario-btn').forEach(btn => btn.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  const data = simData[scenarioId];
+  const gaugeSvg = document.getElementById('sim-gauge-meter');
+  const scoreText = document.getElementById('sim-score-text');
+  const labelEl = document.getElementById('sim-score-label');
+
+  // SVG total stroke-dasharray is roughly 628 for r=100.
+  // Half circle is 314. We map score 0-100 to 314-0 offset representing progress of the half circle.
+  // We want counter-clockwise fill from bottom left (due to rotate-180), or adjust math:
+  // Offset formula for half circle: 628 (empty) to 314 (full half).
+  // Calculate percentage of 314.
+  const targetOffset = 628 - (314 * (data.score/100));
+  gaugeSvg.style.strokeDashoffset = targetOffset;
+  gaugeSvg.style.stroke = data.color;
+
+  scoreText.innerHTML = `${data.score}<span class="text-2xl">%</span>`;
+  scoreText.style.color = data.color;
+  
+  labelEl.textContent = data.label;
+  labelEl.style.color = data.color;
+
+  // Re-trigger animation on impact card
+  const impactCard = document.getElementById('sim-impact-card');
+  impactCard.style.animation = 'none';
+  impactCard.offsetHeight; // trigger reflow
+  impactCard.style.animation = null;
+
+  document.getElementById('sim-delta').textContent = data.delta;
+  document.getElementById('sim-revenue').textContent = data.rev;
+  document.getElementById('sim-rec').textContent = data.rec;
+}
+
+// init defaults
+initActionMode();
+
+</script>
+</body>
+</html>

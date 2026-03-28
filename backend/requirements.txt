@@ -1,0 +1,24 @@
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+pydantic>=2.6.0
+
+# ── ML Core ──────────────────────────────────────────────────────────────────
+xgboost>=2.0.3
+scikit-learn>=1.4.0
+shap>=0.45.0
+pandas>=2.2.0
+numpy>=1.26.0
+
+# ── NLP / BERT ───────────────────────────────────────────────────────────────
+transformers>=4.39.0       # DistilBERT zero-shot classification
+torch>=2.2.0               # CPU inference — remove if no GPU needed
+
+# ── LangChain ────────────────────────────────────────────────────────────────
+langchain>=0.1.13
+langchain-openai>=0.0.8
+openai>=1.14.0
+
+# ── Utilities ────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.1
+matplotlib>=3.8.3
+seaborn>=0.13.2
